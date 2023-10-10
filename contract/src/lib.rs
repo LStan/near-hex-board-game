@@ -88,33 +88,70 @@ impl HexGame {
     }
 
     pub fn make_move(&mut self, game_id: GameId, tile: u32) {
-        let game = self.get_game_mut(&game_id);
-        assert!(game.winner_index == 0, "Game already finished");
+        let game = self.get_game_mut_ref(&game_id);
+        assert!(game.is_not_finished(), "Game already finished");
 
-        let board_size = game.get_board_size();
-        if tile >= board_size * board_size {
-            panic!("Wrong tile");
-        }
-
-        let active_player = game.get_current_player_id();
-        assert_eq!(
-            *active_player,
-            env::predecessor_account_id(),
-            "Not your turn"
-        );
-
-        assert!(game.is_tile_free(tile), "Tile occupied");
-
-        game.make_move(tile);
+        game.make_move(tile, &env::predecessor_account_id());
     }
 
-    // pub fn declare_win(&mut self, game_id: GameId, tile: Option<u32>, path: Vec<u32>) {
+    pub fn declare_win(&mut self, game_id: GameId, tile: Option<u32>, path: Vec<u32>) {
+        let game = self.get_game_mut_ref(&game_id);
+        assert!(game.is_not_finished(), "Game already finished");
 
-    // }
+        let player_id = env::predecessor_account_id();
 
-    // pub fn give_up(&mut self, game_id: GameId) {
+        if let Some(tile) = tile {
+            game.make_move(tile, &player_id);
+        }
 
-    // }
+        assert!(game.is_path_correct(&path, &player_id), "Wrong path");
+    }
+
+    pub fn give_up(&mut self, game_id: GameId) {
+        let game = self.get_game_mut_ref(&game_id);
+        assert!(game.is_not_finished(), "Game already finished");
+
+        let player_id = env::predecessor_account_id();
+
+        game.give_up(&player_id);
+
+        self.available_games.remove(&game_id);
+    }
+
+
+    pub fn get_available_players(&self, from_index: u64, limit: u64) -> Vec<(AccountId, Option<AccountId>)> {
+        let keys: Vec<_> = self.available_players.keys().collect();
+        let values: Vec<_> = self.available_players.values().collect();
+        (from_index..std::cmp::min(from_index + limit, keys.len() as u64))
+            .map(|index| {
+                let player_id1 = (*keys.get(index as usize).unwrap()).clone();
+                let player_id2 =  (*values.get(index as usize).unwrap()).clone();
+                (player_id1, player_id2)
+            })
+            .collect()
+    }
+
+    pub fn get_available_games(&self, from_index: u64, limit: u64) -> Vec<(GameId, (AccountId, AccountId))> {
+        let keys: Vec<_> = self.available_games.keys().collect();
+        let values: Vec<_> = self.available_games.values().collect();
+        (from_index..std::cmp::min(from_index + limit, keys.len() as u64))
+            .map(|index| {
+                let game_id = (*keys.get(index as usize).unwrap()).clone();
+                let (player_id1, player_id2) =  (*values.get(index as usize).unwrap()).clone();
+                (game_id, (player_id1, player_id2))
+            })
+            .collect()
+    }
+
+    pub fn get_game(&self, game_id: GameId) -> Game {
+        let game = self.get_game_ref(&game_id);
+        game.clone()
+    }
+
+    pub fn get_active_player(&self, game_id: GameId) -> AccountId {
+        let game = self.get_game_ref(&game_id);
+        game.get_current_player_id()
+    }
 
     fn check_if_game_started(&self, account_id: &AccountId) {
         let mut found = false;
@@ -131,11 +168,11 @@ impl HexGame {
         assert_ne!(*account_id1, *account_id2, "Can't play with yourself");
     }
 
-    // fn get_game(&mut self, game_id: &GameId) -> &Game {
-    //     self.games.get(game_id).expect("Game not found")
-    // }
+    fn get_game_ref(&self, game_id: &GameId) -> &Game {
+        self.games.get(game_id).expect("Game not found")
+    }
 
-    fn get_game_mut(&mut self, game_id: &GameId) -> &mut Game {
+    fn get_game_mut_ref(&mut self, game_id: &GameId) -> &mut Game {
         self.games.get_mut(game_id).expect("Game not found")
     }
 }

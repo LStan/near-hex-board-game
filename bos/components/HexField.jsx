@@ -1,22 +1,20 @@
-const rows = 11;
-const cols = 11;
+let {
+  componentAccountId,
+  field,
+  rows,
+  cols,
+  curMove,
+  handleClick,
+  curPlayer,
+  player1Color,
+  player2Color,
+} = props;
+
+// console.log("field", field)
 
 const PI = 3.1415926;
-const PLAYER1_COLOR = "#0057B7";
-const PLAYER2_COLOR = "#FFDD00";
-
-
-State.init({
-  field: Array(rows)
-    .fill()
-    .map(() => Array(cols).fill(0)),
-  cur_move: { row: null, col: null },
-  cur_player: 1,
-});
-
-const handleClick = (row, col) => {
-  State.update({ cur_move: { row, col } });
-};
+const PLAYER1_COLOR = player1Color ? player1Color : "#0057B7";
+const PLAYER2_COLOR = player2Color ? player2Color : "#FFDD00";
 
 const size = 20;
 const width = Math.sqrt(3) * size;
@@ -77,12 +75,12 @@ for (let row = 0; row < rows; row++) {
     const y = height * row + height;
 
     let color;
-    if (row == state.cur_move.row && col == state.cur_move.col) {
-      color = state.cur_player == 2 ? PLAYER2_COLOR : PLAYER1_COLOR;
+    if (row == curMove.row && col == curMove.col) {
+      color = curPlayer == 2 ? PLAYER2_COLOR : PLAYER1_COLOR;
     } else {
-      if (state.field[row][col] == 1) {
+      if (field[row][col] == 1) {
         color = PLAYER1_COLOR;
-      } else if (state.field[row][col] == 2) {
+      } else if (field[row][col] == 2) {
         color = PLAYER2_COLOR;
       } else {
         color = "white";
@@ -90,7 +88,7 @@ for (let row = 0; row < rows; row++) {
     }
     hexes.push(
       <Widget
-        src="lso.testnet/widget/Hex"
+        src={`${componentAccountId}/widget/Hex`}
         props={{
           center_x: x,
           center_y: y,

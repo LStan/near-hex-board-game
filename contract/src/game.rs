@@ -31,7 +31,7 @@ pub struct Game {
     player_id1: AccountId,
     player_id2: AccountId,
     board: Board,
-    is_cur_player2: bool,
+    is_first_player_turn: bool,
     winner_index: u32,
 }
 
@@ -41,7 +41,7 @@ impl Game {
             player_id1,
             player_id2,
             board: Board::new(size),
-            is_cur_player2: false,
+            is_first_player_turn: true,
             winner_index: 0,
         }
     }
@@ -55,10 +55,10 @@ impl Game {
     }
 
     pub fn get_current_player_id(&self) -> AccountId {
-        if self.is_cur_player2 {
-            self.player_id2.clone()
-        } else {
+        if self.is_first_player_turn {
             self.player_id1.clone()
+        } else {
+            self.player_id2.clone()
         }
     }
 
@@ -75,13 +75,13 @@ impl Game {
 
         assert!(self.is_tile_free(tile), "Tile occupied");
 
-        self.board.field[tile as usize] = if self.is_cur_player2 {
-            TILE_PLAYER2
-        } else {
+        self.board.field[tile as usize] = if self.is_first_player_turn {
             TILE_PLAYER1
+        } else {
+            TILE_PLAYER2
         };
 
-        self.is_cur_player2 = !self.is_cur_player2;
+        self.is_first_player_turn = !self.is_first_player_turn;
     }
 
     pub fn is_path_correct(&self, path: &Vec<u32>, player_id: &AccountId) -> bool {
@@ -201,7 +201,7 @@ impl Game {
             player_id1,
             player_id2,
             board: Board::new_with_field(size, field),
-            is_cur_player2: false,
+            is_first_player_turn: true,
             winner_index: 0,
         }
     }

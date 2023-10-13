@@ -105,6 +105,10 @@ impl HexGame {
         }
 
         assert!(game.is_path_correct(&path, &player_id), "Wrong path");
+
+        game.win(&player_id);
+
+        self.available_games.remove(&game_id);
     }
 
     pub fn give_up(&mut self, game_id: GameId) {
@@ -118,26 +122,33 @@ impl HexGame {
         self.available_games.remove(&game_id);
     }
 
-
-    pub fn get_available_players(&self, from_index: u64, limit: u64) -> Vec<(AccountId, Option<AccountId>)> {
+    pub fn get_available_players(
+        &self,
+        from_index: u64,
+        limit: u64,
+    ) -> Vec<(AccountId, Option<AccountId>)> {
         let keys: Vec<_> = self.available_players.keys().collect();
         let values: Vec<_> = self.available_players.values().collect();
         (from_index..std::cmp::min(from_index + limit, keys.len() as u64))
             .map(|index| {
                 let player_id1 = (*keys.get(index as usize).unwrap()).clone();
-                let player_id2 =  (*values.get(index as usize).unwrap()).clone();
+                let player_id2 = (*values.get(index as usize).unwrap()).clone();
                 (player_id1, player_id2)
             })
             .collect()
     }
 
-    pub fn get_available_games(&self, from_index: u64, limit: u64) -> Vec<(GameId, (AccountId, AccountId))> {
+    pub fn get_available_games(
+        &self,
+        from_index: u64,
+        limit: u64,
+    ) -> Vec<(GameId, (AccountId, AccountId))> {
         let keys: Vec<_> = self.available_games.keys().collect();
         let values: Vec<_> = self.available_games.values().collect();
         (from_index..std::cmp::min(from_index + limit, keys.len() as u64))
             .map(|index| {
                 let game_id = (*keys.get(index as usize).unwrap()).clone();
-                let (player_id1, player_id2) =  (*values.get(index as usize).unwrap()).clone();
+                let (player_id1, player_id2) = (*values.get(index as usize).unwrap()).clone();
                 (game_id, (player_id1, player_id2))
             })
             .collect()

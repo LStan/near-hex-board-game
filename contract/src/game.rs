@@ -1,7 +1,7 @@
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
+    serde::{Deserialize, Serialize},
     AccountId,
-    serde::{Deserialize, Serialize}
 };
 
 const TILE_EMPTY: u8 = 0;
@@ -158,13 +158,24 @@ impl Game {
         true
     }
 
-    pub fn give_up(&mut self, player_id: &AccountId) {
+    pub fn win(&mut self, player_id: &AccountId) {
         let winner_index = if *player_id == self.player_id1 {
             1
         } else if *player_id == self.player_id2 {
             2
         } else {
-            panic!("Wron account")
+            panic!("Wrong account")
+        };
+        self.winner_index = winner_index;
+    }
+
+    pub fn give_up(&mut self, player_id: &AccountId) {
+        let winner_index = if *player_id == self.player_id1 {
+            2
+        } else if *player_id == self.player_id2 {
+            1
+        } else {
+            panic!("Wrong account")
         };
         self.winner_index = winner_index;
     }

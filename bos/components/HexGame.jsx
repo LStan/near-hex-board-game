@@ -133,7 +133,7 @@ const findPath = (grid, size, player) => {
 };
 
 const handleClick = (row, col) => {
-  if (!state.isYourTurn) {
+  if (!state.isYourTurn || state.winnerIndex != 0) {
     return;
   }
   if (state.field[row][col] == 0) {
@@ -225,7 +225,7 @@ return (
     />
     {state.path ? (
       <button
-        disabled={!state.isYourTurn}
+        disabled={!state.isYourTurn || state.winnerIndex != 0}
         onClick={() => {
           win(gameId, state.curMove, state.field.length, state.path);
         }}
@@ -243,7 +243,7 @@ return (
       </button>
     )}
     <button
-      disabled={!state.isPlayer}
+      disabled={!state.isPlayer || state.winnerIndex != 0}
       style={{ background: "red" }}
       onClick={() => {
         giveUp(gameId);

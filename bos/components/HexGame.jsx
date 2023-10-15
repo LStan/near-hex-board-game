@@ -17,7 +17,7 @@ State.init({
   path: null,
 });
 
-const constractMatrixFiled = (field, size) => {
+const constructMatrixField = (field, size) => {
   let matrix = [];
 
   for (let i = 0; i < size; i++) {
@@ -37,7 +37,7 @@ const getGame = () => {
     .then((game) => {
       // console.log("game", game);
       State.update({
-        field: constractMatrixFiled(game.board.field, game.board.size),
+        field: constructMatrixField(game.board.field, game.board.size),
         players: [game.player_id1, game.player_id2],
         curPlayer: game.is_first_player_turn ? 1 : 2,
         isYourTurn: game.is_first_player_turn
